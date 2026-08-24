@@ -55,13 +55,20 @@ export default function Home() {
   const [notice, setNotice] = useState('')
 
   const filteredNotes = useMemo(() => {
-    const normalizedQuery = query.trim().toLocaleLowerCase()
+    const normalizeSearchText = (value: string) => value
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLocaleLowerCase()
+      .replace(/[^\p{L}\p{N}]+/gu, ' ')
+      .trim()
+
+    const queryWords = normalizeSearchText(query)
+      .split(/\s+/)
+      .filter((word) => word.length > 1)
 
     return notes.filter((note) => {
-      const searchableText = [note.title, note.excerpt, note.content, note.tag]
-        .join(' ')
-        .toLocaleLowerCase()
-      const matchesQuery = !normalizedQuery || searchableText.includes(normalizedQuery)
+      const searchableText = normalizeSearchText([note.title, note.excerpt, note.content, note.tag].join(' '))
+      const matchesQuery = queryWords.length === 0 || queryWords.every((word) => searchableText.includes(word))
       const matchesFolder = !folderFilter || note.tag === folderFilter
       const matchesView = view === 'All notes'
         ? !note.archived && !note.trashed
