@@ -23,6 +23,7 @@ import {
 type Note = {
   title: string
   excerpt: string
+  content: string
   date: string
   tag: string
   favorite: boolean
@@ -31,10 +32,10 @@ type Note = {
 }
 
 const initialNotes: Note[] = [
-  { title: 'Welcome to your notes', excerpt: 'A quiet place for everything on your mind.', date: 'Today', tag: 'Getting started', favorite: true },
-  { title: 'Project ideas', excerpt: 'Small experiments worth exploring this month.', date: 'Yesterday', tag: 'Work', favorite: false },
-  { title: 'Reading list', excerpt: 'Books, essays, and links to return to.', date: 'Jun 12', tag: 'Personal', favorite: true },
-  { title: 'Weekly reflections', excerpt: 'What worked, what surprised me, what is next.', date: 'Jun 09', tag: 'Journal', favorite: false },
+  { title: 'Welcome to your notes', excerpt: 'A quiet place for everything on your mind.', content: 'Use notes to capture ideas, make plans, and keep the details that matter close by.', date: 'Today', tag: 'Getting started', favorite: true },
+  { title: 'Project ideas', excerpt: 'Small experiments worth exploring this month.', content: 'Explore small experiments worth building this month, including a reading tracker and a weekly planning tool.', date: 'Yesterday', tag: 'Work', favorite: false },
+  { title: 'Reading list', excerpt: 'Books, essays, and links to return to.', content: 'Books, essays, and links to return to when there is time for a thoughtful break.', date: 'Jun 12', tag: 'Personal', favorite: true },
+  { title: 'Weekly reflections', excerpt: 'What worked, what surprised me, what is next.', content: 'Think about what worked, what surprised me, and what is next for the coming week.', date: 'Jun 09', tag: 'Journal', favorite: false },
 ]
 
 const navItems = [
@@ -54,7 +55,7 @@ export default function Home() {
   const [notice, setNotice] = useState('')
 
   const filteredNotes = useMemo(() => notes.filter((note) => {
-    const matchesQuery = `${note.title} ${note.excerpt} ${note.tag}`.toLowerCase().includes(query.toLowerCase())
+    const matchesQuery = `${note.title} ${note.excerpt} ${note.content} ${note.tag}`.toLowerCase().includes(query.toLowerCase())
     const matchesFolder = !folderFilter || note.tag === folderFilter
     const matchesView = view === 'All notes' ? !note.archived && !note.trashed : (view === 'Favorites' && note.favorite && !note.archived && !note.trashed) || (view === 'Archive' && note.archived) || (view === 'Trash' && note.trashed)
     return matchesQuery && matchesFolder && matchesView
@@ -67,7 +68,7 @@ export default function Home() {
   }
 
   const createNote = () => {
-    const newNote = { title: 'Untitled note', excerpt: 'Start writing something new.', date: 'Just now', tag: 'Draft', favorite: false }
+    const newNote = { title: 'Untitled note', excerpt: 'Start writing something new.', content: 'Start writing something new and capture your next idea here.', date: 'Just now', tag: 'Draft', favorite: false }
     setNotes((current) => [newNote, ...current])
     setView('All notes')
     setQuery('')
