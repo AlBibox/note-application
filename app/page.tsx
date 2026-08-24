@@ -54,7 +54,7 @@ export default function Home() {
 
   const filteredNotes = useMemo(() => notes.filter((note) => {
     const matchesQuery = `${note.title} ${note.excerpt} ${note.tag}`.toLowerCase().includes(query.toLowerCase())
-    const matchesView = view === 'All notes' || (view === 'Favorites' && note.favorite) || (view === 'Archive' && note.archived) || (view === 'Trash' && note.trashed)
+    const matchesView = view === 'All notes' ? !note.archived && !note.trashed : (view === 'Favorites' && note.favorite && !note.archived && !note.trashed) || (view === 'Archive' && note.archived) || (view === 'Trash' && note.trashed)
     return matchesQuery && matchesView
   }), [notes, query, view])
   const note = filteredNotes[activeNote] ?? filteredNotes[0]
