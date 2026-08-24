@@ -1,6 +1,8 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? ''
 import {
   Archive,
   Bell,
@@ -21,6 +23,7 @@ import {
 } from 'lucide-react'
 
 type Note = {
+  id?: string
   title: string
   excerpt: string
   content: string
@@ -53,6 +56,19 @@ export default function Home() {
   const [view, setView] = useState('All notes')
   const [folderFilter, setFolderFilter] = useState<string | null>(null)
   const [notice, setNotice] = useState('')
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    let cancelled = false
+    fetch(`${API_URL}/api/notes`)
+      .then((response) => response.ok ? response.json() : Promise.reject(new Error('Unable to load notes')))
+      .then((data: Array<Note & { noteDate?: string }>) => {
+        if (!cancelled && data.length) setNotes(data.map((item) => ({ ...item, date: item.date ?? item.noteDate ?? 'Just now' })))
+      })
+      .catch(() => { if (!cancelled) showNotice('Could not connect to notes API') })
+      .finally(() => { if (!cancelled) setLoading(false) })
+    return () => { cancelled = true }
+  }, [])
 
   const filteredNotes = useMemo(() => {
     const normalizeSearchText = (value: string) => value
@@ -86,19 +102,27 @@ export default function Home() {
     window.setTimeout(() => setNotice(''), 2200)
   }
 
-  const createNote = () => {
-    const newNote = { title: 'Untitled note', excerpt: 'Start writing something new.', content: 'Start writing something new and capture your next idea here.', date: 'Just now', tag: 'Draft', favorite: false }
-    setNotes((current) => [newNote, ...current])
-    setView('All notes')
-    setQuery('')
-    setActiveNote(0)
-    showNotice('New note created')
+  const createNote = async () => {
+    try {
+      const response = await fetch(`${API_URL}/api/notes`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title: 'Untitled note', excerpt: 'Start writing something new.', content: 'Start writing something new and capture your next idea here.', tag: 'Draft' }) })
+      if (!response.ok) throw new Error('Create failed')
+      const newNote = await response.json() as Note
+      setNotes((current) => [newNote, ...current])
+      setView('All notes'); setFolderFilter(null); setQuery(''); setActiveNote(0)
+      showNotice('New note created')
+    } catch { showNotice('Could not create note') }
   }
 
-  const toggleFavorite = () => {
-    if (!note) return
-    setNotes((current) => current.map((item) => item.title === note.title ? { ...item, favorite: !item.favorite } : item))
-    showNotice(note.favorite ? 'Removed from favorites' : 'Added to favorites')
+  const toggleFavorite = async () => {
+    if (!note?.id) return
+    const favorite = !note.favorite
+    try {
+      const response = await fetch(`${API_URL}/api/notes/${note.id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ favorite }) })
+      if (!response.ok) throw new Error('Update failed')
+      const updated = await response.json() as Note
+      setNotes((current) => current.map((item) => item.id === updated.id ? updated : item))
+      showNotice(favorite ? 'Added to favorites' : 'Removed from favorites')
+    } catch { showNotice('Could not update note') }
   }
 
   return (
