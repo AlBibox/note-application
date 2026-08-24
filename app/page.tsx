@@ -32,7 +32,7 @@ type Note = {
 
 const initialNotes: Note[] = [
   { title: 'Welcome to your notes', excerpt: 'A quiet place for everything on your mind.', date: 'Today', tag: 'Getting started', favorite: true },
-  { title: 'Project ideas', excerpt: 'Small experiments worth exploring this month.', date: 'Yesterday', tag: 'Ideas', favorite: false },
+  { title: 'Project ideas', excerpt: 'Small experiments worth exploring this month.', date: 'Yesterday', tag: 'Work', favorite: false },
   { title: 'Reading list', excerpt: 'Books, essays, and links to return to.', date: 'Jun 12', tag: 'Personal', favorite: true },
   { title: 'Weekly reflections', excerpt: 'What worked, what surprised me, what is next.', date: 'Jun 09', tag: 'Journal', favorite: false },
 ]
@@ -50,13 +50,15 @@ export default function Home() {
   const [query, setQuery] = useState('')
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [view, setView] = useState('All notes')
+  const [folderFilter, setFolderFilter] = useState<string | null>(null)
   const [notice, setNotice] = useState('')
 
   const filteredNotes = useMemo(() => notes.filter((note) => {
     const matchesQuery = `${note.title} ${note.excerpt} ${note.tag}`.toLowerCase().includes(query.toLowerCase())
+    const matchesFolder = !folderFilter || note.tag === folderFilter
     const matchesView = view === 'All notes' ? !note.archived && !note.trashed : (view === 'Favorites' && note.favorite && !note.archived && !note.trashed) || (view === 'Archive' && note.archived) || (view === 'Trash' && note.trashed)
-    return matchesQuery && matchesView
-  }), [notes, query, view])
+    return matchesQuery && matchesFolder && matchesView
+  }), [notes, query, view, folderFilter])
   const note = filteredNotes[activeNote] ?? filteredNotes[0]
 
   const showNotice = (message: string) => {
@@ -86,8 +88,8 @@ export default function Home() {
         <aside className={`${sidebarOpen ? 'flex' : 'hidden'} w-64 shrink-0 flex-col border-r border-border bg-sidebar px-4 py-5 md:flex`}>
           <div className="flex items-center justify-between px-2"><div className="flex items-center gap-2.5"><div className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground"><FileText className="size-4" /></div><span className="font-semibold tracking-tight">noted</span></div><button aria-label="Collapse sidebar" onClick={() => setSidebarOpen(false)} className="rounded-md p-1.5 text-muted-foreground hover:bg-accent hover:text-foreground"><PanelLeft className="size-4" /></button></div>
           <button onClick={createNote} className="mt-8 flex items-center justify-center gap-2 rounded-lg bg-primary px-3 py-2.5 text-sm font-medium text-primary-foreground shadow-sm transition hover:opacity-90"><Plus className="size-4" /> New note</button>
-          <nav className="mt-7 flex flex-col gap-1" aria-label="Main navigation">{navItems.map(({ label, icon: Icon }) => <button key={label} onClick={() => { setView(label); if (label === 'All notes' && ['Work', 'Personal', 'Journal'].includes(query)) setQuery(''); setActiveNote(0) }} className={`flex items-center justify-between rounded-lg px-3 py-2 text-sm ${view === label ? 'bg-accent font-medium text-foreground' : 'text-muted-foreground hover:bg-accent hover:text-foreground'}`}><span className="flex items-center gap-3"><Icon className="size-4" />{label}</span></button>)}</nav>
-          <div className="mt-8 border-t border-border pt-6"><div className="flex items-center justify-between px-3 pb-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground"><span>Folders</span><button aria-label="Add folder" onClick={() => showNotice('Folder creation is ready for the next step')}><Plus className="size-3.5" /></button></div>{['Work', 'Personal', 'Journal'].map((folder) => <button key={folder} onClick={() => { setQuery(folder); setView('All notes') }} className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm ${query === folder ? 'bg-accent font-medium text-foreground' : 'text-muted-foreground hover:bg-accent hover:text-foreground'}`}><Folder className="size-4" />{folder}</button>)}</div>
+          <nav className="mt-7 flex flex-col gap-1" aria-label="Main navigation">{navItems.map(({ label, icon: Icon }) => <button key={label} onClick={() => { setView(label); setFolderFilter(null); setQuery(''); setActiveNote(0) }} className={`flex items-center justify-between rounded-lg px-3 py-2 text-sm ${view === label && !folderFilter ? 'bg-accent font-medium text-foreground' : 'text-muted-foreground hover:bg-accent hover:text-foreground'}`}><span className="flex items-center gap-3"><Icon className="size-4" />{label}</span></button>)}</nav>
+          <div className="mt-8 border-t border-border pt-6"><div className="flex items-center justify-between px-3 pb-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground"><span>Folders</span><button aria-label="Add folder" onClick={() => showNotice('Folder creation is ready for the next step')}><Plus className="size-3.5" /></button></div>{['Work', 'Personal', 'Journal'].map((folder) => <button key={folder} onClick={() => { setFolderFilter(folder); setQuery(''); setActiveNote(0) }} className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm ${folderFilter === folder ? 'bg-accent font-medium text-foreground' : 'text-muted-foreground hover:bg-accent hover:text-foreground'}`}><Folder className="size-4" />{folder}</button>)}</div>
           <div className="mt-auto flex flex-col gap-1"><button onClick={() => showNotice('Settings will be available soon')} className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-muted-foreground hover:bg-accent hover:text-foreground"><Settings className="size-4" />Settings</button><div className="mt-3 flex items-center gap-3 border-t border-border px-2 pt-4"><div className="flex size-8 items-center justify-center rounded-full bg-accent text-xs font-semibold">AM</div><div className="min-w-0"><p className="truncate text-sm font-medium">Alex Morgan</p><p className="truncate text-xs text-muted-foreground">Personal workspace</p></div><ChevronDown className="ml-auto size-4 text-muted-foreground" /></div></div>
         </aside>
         <section className="flex min-w-0 flex-1 flex-col">
