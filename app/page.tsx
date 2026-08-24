@@ -34,7 +34,7 @@ type Note = {
   trashed?: boolean
 }
 
-const folderOptions = ['Work', 'Personal', 'Journal', 'Draft']
+const folderOptions = ['Work', 'Personal', 'Journal']
 
 const initialNotes: Note[] = [
   { title: 'Welcome to your notes', excerpt: 'A quiet place for everything on your mind.', content: 'Use notes to capture ideas, make plans, and keep the details that matter close by.', date: 'Today', tag: 'Getting started', favorite: true },

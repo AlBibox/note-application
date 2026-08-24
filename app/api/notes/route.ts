@@ -18,7 +18,7 @@ export async function POST(request: Request) {
     title,
     excerpt: typeof body.excerpt === 'string' ? body.excerpt : '',
     content: typeof body.content === 'string' ? body.content : '',
-    tag: typeof body.tag === 'string' ? body.tag : 'Draft',
+    tag: typeof body.tag === 'string' ? body.tag : '',
     noteDate: 'Just now',
   }).returning()
   return NextResponse.json(note, { status: 201 })
