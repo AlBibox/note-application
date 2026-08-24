@@ -126,14 +126,22 @@ export default function Home() {
   }
 
   const updateNote = async (updates: Partial<Pick<Note, 'title' | 'excerpt' | 'content'>>) => {
-    if (!note?.id) return
+    if (!note?.id || Object.keys(updates).length === 0) return
+
+    const noteId = note.id
     const optimistic = { ...note, ...updates }
-    setNotes((current) => current.map((item) => item.id === note.id ? optimistic : item))
+    setNotes((current) => current.map((item) => item.id === noteId ? optimistic : item))
+
     try {
-      const response = await fetch(`${API_URL}/api/notes/${note.id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(updates) })
+      const response = await fetch(`${API_URL}/api/notes/${noteId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updates),
+      })
       if (!response.ok) throw new Error('Update failed')
       const updated = await response.json() as Note
       setNotes((current) => current.map((item) => item.id === updated.id ? { ...item, ...updated, date: updated.date ?? item.date } : item))
+      showNotice('Note saved')
     } catch {
       showNotice('Could not save note')
     }
