@@ -1,0 +1,25 @@
+import { NextResponse } from 'next/server'
+import { randomUUID } from 'node:crypto'
+import { db } from '@/lib/db'
+import { notes } from '@/lib/schema'
+import { asc } from 'drizzle-orm'
+
+export async function GET() {
+  const result = await db.select().from(notes).orderBy(asc(notes.createdAt))
+  return NextResponse.json(result)
+}
+
+export async function POST(request: Request) {
+  const body = await request.json().catch(() => ({}))
+  const title = typeof body.title === 'string' ? body.title.trim() : 'Untitled note'
+  if (!title) return NextResponse.json({ error: 'Title is required' }, { status: 400 })
+  const [note] = await db.insert(notes).values({
+    id: randomUUID(),
+    title,
+    excerpt: typeof body.excerpt === 'string' ? body.excerpt : '',
+    content: typeof body.content === 'string' ? body.content : '',
+    tag: typeof body.tag === 'string' ? body.tag : 'Draft',
+    noteDate: 'Just now',
+  }).returning()
+  return NextResponse.json(note, { status: 201 })
+}
