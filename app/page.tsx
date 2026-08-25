@@ -1,6 +1,8 @@
 'use client'
 
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { useSession } from '@/lib/auth-client'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? ''
 import {
@@ -53,6 +55,8 @@ const navItems = [
 ]
 
 export default function Home() {
+  const router = useRouter()
+  const { data: session, isPending } = useSession()
   const [notes, setNotes] = useState(initialNotes)
   const [activeNote, setActiveNote] = useState(0)
   const [query, setQuery] = useState('')
@@ -62,6 +66,10 @@ export default function Home() {
   const [notice, setNotice] = useState('')
   const [loading, setLoading] = useState(true)
   const saveTimer = useRef<number | null>(null)
+
+  useEffect(() => {
+    if (!isPending && !session) router.replace('/register')
+  }, [isPending, router, session])
 
   useEffect(() => {
     return () => {
@@ -231,6 +239,10 @@ export default function Home() {
     } catch {
       showNotice('Could not save note')
     }
+  }
+
+  if (isPending || !session) {
+    return <main className="flex min-h-screen items-center justify-center bg-background font-sans text-sm text-muted-foreground">Opening your workspace…</main>
   }
 
   return (
