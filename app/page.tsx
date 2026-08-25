@@ -119,7 +119,7 @@ export default function Home() {
       archived: view === 'Archive',
       trashed: view === 'Trash',
     }
-    const tag = folderFilter ?? ''
+    const tag = view === 'Trash' ? '' : (folderFilter ?? '')
 
     try {
       const response = await fetch(`${API_URL}/api/notes`, {
