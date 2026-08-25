@@ -23,8 +23,9 @@ export default function RegisterPage() {
       setError('Unable to create your account. Check your details and try again.')
       return
     }
-    router.push('/')
-    router.refresh()
+    // Use a full navigation so the newly issued session cookie is available
+    // before the protected notes workspace checks the session.
+    window.location.replace('/')
   }
 
   return (
