@@ -41,7 +41,7 @@ app.patch('/api/notes/:id', async (req, res) => {
 })
 
 app.delete('/api/notes/:id', async (req, res) => {
-  const [note] = await db.update(notes).set({ trashed: true, updatedAt: new Date() }).where(eq(notes.id, req.params.id)).returning()
+  const [note] = await db.update(notes).set({ trashed: true, archived: false, updatedAt: new Date() }).where(eq(notes.id, req.params.id)).returning()
   if (!note) return res.status(404).json({ error: 'Note not found' })
   res.json(note)
 })
