@@ -19,6 +19,9 @@ export async function POST(request: Request) {
     excerpt: typeof body.excerpt === 'string' ? body.excerpt : '',
     content: typeof body.content === 'string' ? body.content : '',
     tag: typeof body.tag === 'string' ? body.tag : '',
+    favorite: typeof body.favorite === 'boolean' ? body.favorite : false,
+    archived: typeof body.archived === 'boolean' ? body.archived : false,
+    trashed: typeof body.trashed === 'boolean' ? body.trashed : false,
     noteDate: 'Just now',
   }).returning()
   return NextResponse.json(note, { status: 201 })

@@ -112,12 +112,30 @@ export default function Home() {
   }
 
   const createNote = async () => {
+    const destination = {
+      favorite: view === 'Favorites',
+      archived: view === 'Archive',
+      trashed: view === 'Trash',
+    }
+    const tag = folderFilter ?? ''
+
     try {
-      const response = await fetch(`${API_URL}/api/notes`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title: 'Untitled note', excerpt: 'Start writing something new.', content: 'Start writing something new and capture your next idea here.', tag: 'Draft' }) })
+      const response = await fetch(`${API_URL}/api/notes`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: 'Untitled note',
+          excerpt: 'Start writing something new.',
+          content: 'Start writing something new and capture your next idea here.',
+          tag,
+          ...destination,
+        }),
+      })
       if (!response.ok) throw new Error('Create failed')
       const newNote = await response.json() as Note
       setNotes((current) => [newNote, ...current])
-      setView('All notes'); setFolderFilter(null); setQuery(''); setActiveNote(0)
+      setQuery('')
+      setActiveNote(0)
       showNotice('New note created')
     } catch { showNotice('Could not create note') }
   }
