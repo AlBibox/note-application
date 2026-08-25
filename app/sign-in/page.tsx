@@ -2,11 +2,9 @@
 
 import Link from 'next/link'
 import { FormEvent, useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { signIn } from '@/lib/auth-client'
 
 export default function SignInPage() {
-  const router = useRouter()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
@@ -16,14 +14,19 @@ export default function SignInPage() {
     event.preventDefault()
     setError('')
     setLoading(true)
-    const result = await signIn.email({ email, password })
-    setLoading(false)
-    if (result.error) {
+    try {
+      const result = await signIn.email({ email, password })
+      if (result.error) {
+        setError('Unable to sign in. Check your email and password.')
+        return
+      }
+      window.location.assign('/')
+    } catch (error) {
+      console.error('[v0] Sign-in failed:', error)
       setError('Unable to sign in. Check your email and password.')
-      return
+    } finally {
+      setLoading(false)
     }
-    router.push('/')
-    router.refresh()
   }
 
   return (
