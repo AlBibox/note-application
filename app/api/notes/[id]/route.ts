@@ -17,6 +17,6 @@ export async function PATCH(request: Request, context: Context) {
 
 export async function DELETE(_request: Request, context: Context) {
   const { id } = await context.params
-  const [note] = await db.update(notes).set({ trashed: true, archived: false, tag: '', updatedAt: new Date() }).where(eq(notes.id, id)).returning()
+  const [note] = await db.update(notes).set({ trashed: true, favorite: false, archived: false, tag: '', updatedAt: new Date() }).where(eq(notes.id, id)).returning()
   return note ? NextResponse.json(note) : NextResponse.json({ error: 'Note not found' }, { status: 404 })
 }
