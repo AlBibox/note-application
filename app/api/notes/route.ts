@@ -2,7 +2,14 @@ import { NextResponse } from 'next/server'
 import { randomUUID } from 'node:crypto'
 import { db } from '@/lib/db'
 import { notes } from '@/lib/schema'
-import { asc } from 'drizzle-orm'
+import { asc, eq } from 'drizzle-orm'
+
+export async function DELETE(request: Request) {
+  const url = new URL(request.url)
+  if (url.searchParams.get('trash') !== 'clear') return NextResponse.json({ error: 'Invalid trash action' }, { status: 400 })
+  await db.delete(notes).where(eq(notes.trashed, true))
+  return NextResponse.json({ success: true })
+}
 
 export async function GET() {
   const result = await db.select().from(notes).orderBy(asc(notes.createdAt))
