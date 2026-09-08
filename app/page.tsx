@@ -40,13 +40,6 @@ type Note = {
 
 const folderOptions = ['Work', 'Personal', 'Journal']
 
-const initialNotes: Note[] = [
-  { title: 'Welcome to your notes', excerpt: 'A quiet place for everything on your mind.', content: 'Use notes to capture ideas, make plans, and keep the details that matter close by.', date: 'Today', tag: 'Getting started', favorite: true },
-  { title: 'Project ideas', excerpt: 'Small experiments worth exploring this month.', content: 'Explore small experiments worth building this month, including a reading tracker and a weekly planning tool.', date: 'Yesterday', tag: 'Work', favorite: false },
-  { title: 'Reading list', excerpt: 'Books, essays, and links to return to.', content: 'Books, essays, and links to return to when there is time for a thoughtful break.', date: 'Jun 12', tag: 'Personal', favorite: true },
-  { title: 'Weekly reflections', excerpt: 'What worked, what surprised me, what is next.', content: 'Think about what worked, what surprised me, and what is next for the coming week.', date: 'Jun 09', tag: 'Journal', favorite: false },
-]
-
 const navItems = [
   { label: 'All notes', icon: Inbox },
   { label: 'Favorites', icon: Star },
@@ -57,7 +50,7 @@ const navItems = [
 export default function Home() {
   const router = useRouter()
   const { data: session, isPending } = useSession()
-  const [notes, setNotes] = useState(initialNotes)
+  const [notes, setNotes] = useState<Note[]>([])
   const [activeNote, setActiveNote] = useState(0)
   const [query, setQuery] = useState('')
   const [sidebarOpen, setSidebarOpen] = useState(true)
